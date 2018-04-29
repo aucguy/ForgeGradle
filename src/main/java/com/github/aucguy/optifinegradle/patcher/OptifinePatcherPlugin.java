@@ -92,7 +92,7 @@ public class OptifinePatcherPlugin extends PatcherPlugin
     public void applyPlugin()
     {
         super.applyPlugin();
-        delegate.applyPlugin(OptifinePatcherExtension.class);
+        delegate.applyPlugin(project, OptifinePatcherExtension.class);
 
         OptifinePatcherPlugin self = this;
         NamedDomainObjectContainer<OptifinePatcherProject> container = project.container(OptifinePatcherProject.class,

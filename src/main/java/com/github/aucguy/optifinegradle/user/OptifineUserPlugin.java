@@ -16,12 +16,20 @@ import static com.github.aucguy.optifinegradle.OptifineConstants.TASK_JOIN_JARS;
 import static com.github.aucguy.optifinegradle.OptifineConstants.TASK_OPTIFINE_PATCH;
 import static com.github.aucguy.optifinegradle.OptifineConstants.TASK_REMOVE_EXTRAS;
 import static com.github.aucguy.optifinegradle.OptifineConstants.USER_RENAMES;
+import static com.github.aucguy.optifinegradle.OptifineConstants.TASK_PREPROCESS;
 import static net.minecraftforge.gradle.common.Constants.MCP_PATCHES_MERGED;
+import static net.minecraftforge.gradle.common.Constants.TASK_MERGE_JARS;
 import static net.minecraftforge.gradle.user.UserConstants.*;
 import static net.minecraftforge.gradle.user.patcherUser.PatcherUserConstants.TASK_PATCH;
 import static net.minecraftforge.gradle.user.patcherUser.PatcherUserConstants.ZIP_UD_PATCHES;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.gradle.api.Task;
+
 import java.io.File;
 
 import com.github.aucguy.optifinegradle.ExtractRenames;
@@ -31,6 +39,7 @@ import com.github.aucguy.optifinegradle.OptifinePlugin;
 import com.github.aucguy.optifinegradle.RemoveExtras;
 
 import groovy.lang.Closure;
+import net.minecraftforge.gradle.tasks.DeobfuscateJar;
 import net.minecraftforge.gradle.tasks.PatchSourcesTask;
 import net.minecraftforge.gradle.tasks.PostDecompileTask;
 import net.minecraftforge.gradle.tasks.RemapSources;
@@ -52,7 +61,7 @@ public class OptifineUserPlugin extends ForgePlugin
     public void applyUserPlugin()
     {
         super.applyUserPlugin();
-        delegate.applyPlugin(OptifineExtension.class);
+        delegate.applyPlugin(project, OptifineExtension.class);
 
         DownloadWithFile dlPatches = makeTask(TASK_DL_PATCHES, DownloadWithFile.class);
         {
@@ -70,6 +79,15 @@ public class OptifineUserPlugin extends ForgePlugin
         JoinJars join = (JoinJars) project.getTasks().getByName(TASK_JOIN_JARS);
         {
         	join.dependsOn(extractRenames);
+        }
+        
+        DeobfuscateJar deobfDecomp = (DeobfuscateJar) project.getTasks().getByName(TASK_DEOBF);
+        {
+            Set<Object> dependencies = deobfDecomp.getDependsOn();
+            Set<Object> newDependencies = dependencies.stream()
+                    .filter(Predicate.isEqual(TASK_MERGE_JARS).negate()).collect(Collectors.toSet());
+            deobfDecomp.setDependsOn(newDependencies);
+            deobfDecomp.dependsOn(TASK_PREPROCESS);
         }
 
         ApplyFernFlowerTask decompile = (ApplyFernFlowerTask) project.getTasks().getByName(TASK_DECOMPILE);

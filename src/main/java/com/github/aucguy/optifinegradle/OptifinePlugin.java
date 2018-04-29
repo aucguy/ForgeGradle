@@ -11,6 +11,9 @@ import static net.minecraftforge.gradle.common.Constants.TASK_MERGE_JARS;
 import java.util.Scanner;
 
 import org.gradle.api.tasks.Exec;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.Task;
 
 import com.github.aucguy.optifinegradle.user.JoinJars;
 
@@ -32,7 +35,7 @@ public class OptifinePlugin
         plugin.isOptifine = true;
     }
 
-    public void applyPlugin(Class<? extends OptifineExtension> extensionClass)
+    public void applyPlugin(Project project, Class<? extends OptifineExtension> extensionClass)
     {
     	extension = plugin.project.getExtensions().create(EXTENSION, extensionClass);
 
